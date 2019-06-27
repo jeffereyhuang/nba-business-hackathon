@@ -11,6 +11,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(lubridate)
 library(janitor)
+library(rpart)
+library(randomForest)
 
 ```
 
@@ -19,11 +21,55 @@ library(janitor)
 train <- read.csv("training_set.csv") %>% 
   clean_names()
 
-train %>% 
-  mutate(month_created = month(created)) %>% 
-  View()
+train <- train %>% 
+  mutate(month = month(created),
+         day = wday(created),
+         year = year(created)) %>% 
+  mutate(num_people = str_count(description, "@"),
+         num_hash = str_count(description, "#")) 
   
-  
+
+```
+
+```{r}
+# more descriptive time variables (in season, time of day, weekday)
+train <- train %>% 
+  mutate(weekday = ifelse(day %in% c(2:6), TRUE, FALSE),
+         season = ifelse(month %in% c(10:12, 1:5), TRUE, FALSE),
+         followers = followers_at_posting,
+         post_type = type
+         ) 
+
+# ranking of how famous people are
+
+
+
+```
+
+
+```{r test}
+
+vars = colnames(train[6:13])
+
+one_tree <- rpart(reformulate(vars, "engagements")
+                  , data=train
+                  , control = rpart.control(xval = 10)) ## this sets the number of folds for cross validation.
+rank_hat_tree <- predict(one_tree, newdata=train)
+train$tree <- rank_hat_tree
+
+
+forest_hat <- randomForest(reformulate(vars, "engagements"), ntree=1000, mtry=11, maxnodes=100
+                           ,importance=TRUE, do.trace=25, data=train)
+getTree(forest_hat, 250, labelVar = TRUE) #Text Representation of Tree
+rank_hat_forest <- predict(forest_hat, newdata=train,type="response")
+train$forest <- rank_hat_forest
+
+train$pred_error_for = train$engagements - train$forest
+train$mse_forest = train$pred_error_for^2
+
+train$pred_error_trees = train$engagements - train$tree
+train$mse_trees = train$pred_error_trees^2
+summary(train)
 
 ```
 
