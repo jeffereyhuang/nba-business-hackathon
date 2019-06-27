@@ -1,0 +1,29 @@
+---
+title: "script"
+author: "Jeff Huang"
+date: "6/26/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(lubridate)
+library(janitor)
+
+```
+
+```{r}
+
+train <- read.csv("training_set.csv") %>% 
+  clean_names()
+
+train %>% 
+  mutate(month_created = month(created)) %>% 
+  View()
+  
+  
+
+```
+
