@@ -13,6 +13,7 @@ library(lubridate)
 library(janitor)
 library(rpart)
 library(randomForest)
+library(ggplot2)
 
 ```
 
@@ -21,24 +22,62 @@ library(randomForest)
 train <- read.csv("training_set.csv") %>% 
   clean_names()
 
+
+# faceted linear graph of followers, engagements
+media_type_test <- train %>%
+ select(post_type, followers_at_posting, engagements) %>%
+
 train <- train %>% 
   mutate(month = month(created),
          day = wday(created),
-         year = year(created)) %>% 
+         year = year(created),
+         hour = hour(created))
+
+train <- train %>% 
   mutate(num_people = str_count(description, "@"),
-         num_hash = str_count(description, "#")) 
+         num_hash = str_count(description, "#"))
+
+
+
+
+  
+
   
 
 ```
+
+
+```{r tests}
+
+
+num_posts <- train %>% 
+  filter(year == 2018, hour == 11, playoffs, weekday) %>% 
+  group_by(year, month, day, hour) %>% 
+  mutate(posts_per_hour = n()) %>% 
+  
+  ggplot(aes(followers_at_posting, engagements)) +
+  geom_point(aes(color = posts_per_hour))
+
+# bin scatter plot
+#rdplot(narrow$yvar, narrow$school_enrollment, c = 40.5, nbins = 20) 
+
+```
+
 
 ```{r}
 # more descriptive time variables (in season, time of day, weekday)
 train <- train %>% 
   mutate(weekday = ifelse(day %in% c(2:6), TRUE, FALSE),
          season = ifelse(month %in% c(10:12, 1:5), TRUE, FALSE),
+         # fix this
+         playoffs = ifelse(month %in% c(4:6), TRUE, FALSE),
+         
+         time = ifelse(hour %in% c(8:11), "day", ifelse(hour %in% c(12:13), "lunch", ifelse(hour %in% c(14:16), "afternoon", ifelse(hour %in% c(17:24), "night", "none")))),
          followers = followers_at_posting,
          post_type = type
          ) 
+
+
 
 # ranking of how famous people are
 
@@ -47,29 +86,32 @@ train <- train %>%
 ```
 
 
-```{r test}
+```{r tree and random forest}
 
-vars = colnames(train[6:13])
+vars = colnames(train[6:21])
 
 one_tree <- rpart(reformulate(vars, "engagements")
                   , data=train
                   , control = rpart.control(xval = 10)) ## this sets the number of folds for cross validation.
 rank_hat_tree <- predict(one_tree, newdata=train)
 train$tree <- rank_hat_tree
+printcp(one_tree)
 
 
 forest_hat <- randomForest(reformulate(vars, "engagements"), ntree=1000, mtry=11, maxnodes=100
                            ,importance=TRUE, do.trace=25, data=train)
 getTree(forest_hat, 250, labelVar = TRUE) #Text Representation of Tree
 rank_hat_forest <- predict(forest_hat, newdata=train,type="response")
+summary(rank_hat_forest); hist(rank_hat_forest, xlab="Predicted Rates - Random Forest")
 train$forest <- rank_hat_forest
 
 train$pred_error_for = train$engagements - train$forest
 train$mse_forest = train$pred_error_for^2
+summary(train$mse_forest)
 
 train$pred_error_trees = train$engagements - train$tree
 train$mse_trees = train$pred_error_trees^2
-summary(train)
+summary(train$mse_trees)
 
 ```
 
