@@ -24,8 +24,7 @@ train <- read.csv("training_set.csv") %>%
 
 
 # faceted linear graph of followers, engagements
-media_type_test <- train %>%
- select(post_type, followers_at_posting, engagements) %>%
+
 
 train <- train %>% 
   mutate(month = month(created),
@@ -33,7 +32,7 @@ train <- train %>%
          year = year(created),
          hour = hour(created))
 
-train <- train %>% 
+train <- train %>%
   mutate(num_people = str_count(description, "@"),
          num_hash = str_count(description, "#"))
 
@@ -71,11 +70,10 @@ train <- train %>%
          season = ifelse(month %in% c(10:12, 1:5), TRUE, FALSE),
          # fix this
          playoffs = ifelse(month %in% c(4:6), TRUE, FALSE),
-         
          time = ifelse(hour %in% c(8:11), "day", ifelse(hour %in% c(12:13), "lunch", ifelse(hour %in% c(14:16), "afternoon", ifelse(hour %in% c(17:24), "night", "none")))),
-         followers = followers_at_posting,
-         post_type = type
-         ) 
+         followers = followers_at_posting
+         ) %>% 
+  mutate_if(is.character, as.factor)
 
 
 
@@ -88,30 +86,31 @@ train <- train %>%
 
 ```{r tree and random forest}
 
-vars = colnames(train[6:21])
+vars = colnames(train[6:16])
+videos <- train %>% filter(type == "Video")
 
-one_tree <- rpart(reformulate(vars, "engagements")
-                  , data=train
-                  , control = rpart.control(xval = 10)) ## this sets the number of folds for cross validation.
-rank_hat_tree <- predict(one_tree, newdata=train)
-train$tree <- rank_hat_tree
-printcp(one_tree)
+# one_tree <- rpart(reformulate(vars, "engagements")
+#                   , data=train
+#                   , control = rpart.control(xval = 10)) ## this sets the number of folds for cross validation.
+# rank_hat_tree <- predict(one_tree, newdata=train)
+# train$tree <- rank_hat_tree
+# printcp(one_tree)
+
 
 
 forest_hat <- randomForest(reformulate(vars, "engagements"), ntree=1000, mtry=11, maxnodes=100
-                           ,importance=TRUE, do.trace=25, data=train)
+                           ,importance=TRUE, do.trace=25, data=videos)
 getTree(forest_hat, 250, labelVar = TRUE) #Text Representation of Tree
-rank_hat_forest <- predict(forest_hat, newdata=train,type="response")
+rank_hat_forest <- predict(forest_hat, newdata=videos,type="response")
 summary(rank_hat_forest); hist(rank_hat_forest, xlab="Predicted Rates - Random Forest")
 train$forest <- rank_hat_forest
 
-train$pred_error_for = train$engagements - train$forest
-train$mse_forest = train$pred_error_for^2
-summary(train$mse_forest)
 
-train$pred_error_trees = train$engagements - train$tree
-train$mse_trees = train$pred_error_trees^2
-summary(train$mse_trees)
+
+forest_mape = mean(abs((train$engagements - train$forest)/train$engagements)*100)
+
+
+# trees_mape = mean(abs((train$engagements - train$tree)/train$engagements)*100)
 
 ```
 
