@@ -51,26 +51,7 @@ boost_model <- xgboost(data = dtrain, # the data
 actual = test_labels
 predicted = predict(boost_model, dtest)
 mape = mean(abs((actual - predicted)/actual) * 100)
-mape
+mape # 7.2
 
-# Conclusion: This doesn't outperform much, but has the potential too. Potentially adding in data from descriptions and using 'ensemble methods' (which I have to review a bit) could make this be our top go.
-```
-
-```{r}
-
-df_vid = df[df$Type == 'Video',]
-set.seed(123) 
-sample = sample.split(df_vid, SplitRatio = 0.75)
-train_vid = subset(df_vid, sample == TRUE)
-test_vid = subset(df_vid, sample == FALSE) 
-fit = lm(Engagements ~ Followers + year + month + weekday + day_time + is_playoffs, data = train_vid)
-summary(fit) # remove is_playoffs
-fit.2 = lm(Engagements ~ Followers + year + month + weekday + day_time, data = train_vid)
-summary(fit.2)
-
-actual = test_vid$Engagements
-predicted = predict(fit.2, test_vid)
-mape = mean(abs((actual - predicted)/actual) * 100)
-mape # = 9.72, decent number to baseline against
-
+# Conclusion: This doesn't outperform the random forest, but has the potential too. Potentially using'ensemble methods' (which I have to review a bit) could make this be our top go. For now, we should look at more precise predictors.
 ```
