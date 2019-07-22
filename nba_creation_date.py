@@ -50,13 +50,45 @@ class CreationDate:
             return "night"
         else:
             return "postgame"
-
+    def season_yr(self):
+        if (self.date > datetime.date(2017, 10, 17) and self.date < datetime.date(2018, 6, 8)):
+          return "2018"
+        elif (self.date > datetime.date(2018, 10, 16) and self.date < datetime.date(2019, 6, 13)):
+          return "2019"
+        else:
+          return ""
+    def is_season(self):
+        if self.season_yr:
+          return True
+        return False
     def is_playoffs(self):
+      if not is_season:
+        return False
+      if self.season_yr == "2018":
         return (
             (self.date.month == 5)
-            or (self.date.month == 4 and self.date.day >= 10)
-            or (self.date.month == 6 and self.date.day <= 15)
+            or (self.date.month == 4 and self.date.day >= 14)
+            or (self.date.month == 6 and self.date.day <= 8)
         )
+      elif self.season_yr == "2019":
+        return (
+            (self.date.month == 5)
+            or (self.date.month == 4 and self.date.day >= 13)
+            or (self.date.month == 6 and self.date.day <= 13)
+        )
+
+    def is_finals(self):
+      if not is_playoffs:
+        return False
+      if self.season_yr == "2018":
+        return (
+          (self.date.month == 5 and self.date.day >= 31) and (self.date.month == 6 and self.date.day <= 8)
+        )
+      elif self.season_yr == "2019":
+        return (
+          (self.date.month == 5 and self.date.day >= 30) and (self.date.month == 6 and self.date.day <= 13)
+        )
+    
 
 
 # Functions to convert string into datetime object
