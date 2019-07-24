@@ -168,6 +168,8 @@ g + geom_boxplot(position = "dodge", fill = "#CC79A7") + labs(title="Effect of @
 g <- ggplot(nba_graphs, aes(x = num_hash, y = Engagements))
 g + geom_boxplot(position = "dodge", fill = "#CC79A7") + labs(title="Effec of Hashtags (#)", x= "Number of #s", y="Engagements") + theme_minimal()
 ```
+
+
 ```{r eval = FALSE}
 g <- ggplot(nba_graphs, aes(x = Type, y = Engagements, fill = month))
 g + geom_boxplot(position = "dodge", outlier.shape=NA) + labs(title="Engagements by Month", x= "Month", y="Engagements") + theme_minimal()
