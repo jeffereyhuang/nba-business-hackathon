@@ -11,7 +11,7 @@ Presented with the task of predicting the number of engagements with Instagram p
 
 First, we defined functions to calculate predicted values, absolute percent error of each prediction, and mean absolute percent error as follows (this will be useful for training later):
 
-```{r}
+```{r functions}
 ## Create useful functions for calculating mape
 Calc_Mape <- function(labels, dataset, model)
   {
@@ -39,21 +39,18 @@ Calc_PE <- function(labels, dataset, model)
 
 Next we loaded in the necessary packages and read in the training set:
 
-```{r}
+```{r library, echo=FALSE}
 ## Load necessary libraries and read data
 require(caTools)
 require(gam)
 require(xgboost)
 require(Matrix)
-library(readr)
-library(stringr)
-library(car)
-library(dplyr)
+library(tidyverse)
 library(ggplot2)
 library(randomForest)
 
 # Read in data
-df <- read.csv("~/Desktop/NBA_Analytics/nba-business-hackathon/data/training_set_extended_5.csv")
+df <- read.csv("training_set_extended_5.csv")
 ```
 
 \textbf{Predictors Preparation and Data Parsing}
@@ -64,7 +61,7 @@ In addition, we created variables for the number of instagram accounts mentioned
 
 Note: In an attached Python file, you will find some code with our initial modifications to the dataset, including using datetime functions, parsing out important information from the \textit{Created} column and Instagram descriptions.
 
-```{r}
+```{r data cleaning}
 ## Deleting missing data
 
 # Order data by post description
@@ -75,7 +72,7 @@ df <- df[-c(1:14), ]
 df <- df[-c(6:21), ]
 ```
 
-```{r}
+```{r variable extension}
 ## Create variables for number of people and number of hashtags
 ## mentioned, turn weekdays and post type into numbers, and clean is_season variable.
 
@@ -113,12 +110,11 @@ for(i in 1:length(nba[,1])){
   if(nba$day_time[i] == "night")(nba$day_time_num[i] = 6)
   if(nba$day_time[i] == "postgame")(nba$day_time_num[i] = 7)
 }
-```
 
-```{r}
 # Delete irrelevant indexing columns.
 nba <- nba[,-c(1,2)]
 ```
+
 
 \textbf{Data Visualizations}
 
@@ -166,25 +162,30 @@ g <- ggplot(nba_graphs, aes(x = num_ats, y = Engagements))
 g + geom_boxplot(position = "dodge", fill = "#CC79A7") + labs(title="Effect of @s", x= "Number of @s", y="Engagements") + theme_minimal()
 
 g <- ggplot(nba_graphs, aes(x = num_hash, y = Engagements))
-g + geom_boxplot(position = "dodge", fill = "#CC79A7") + labs(title="Effec of Hashtags (#)", x= "Number of #s", y="Engagements") + theme_minimal()
+g + geom_boxplot(position = "dodge", fill = "#CC79A7") + labs(title="Effect of Hashtags (#)", x= "Number of #s", y="Engagements") + theme_minimal()
 ```
 
 
 ```{r eval = FALSE}
-g <- ggplot(nba_graphs, aes(x = Type, y = Engagements, fill = month))
-g + geom_boxplot(position = "dodge", outlier.shape=NA) + labs(title="Engagements by Month", x= "Month", y="Engagements") + theme_minimal()
 
-#scale_x_discrete(limits = c("October", "November", "December","January", "February","March", "April","May","June","July","August","September"))
+# reordering
+nba_graphs <- nba_graphs %>% 
+  mutate(month = fct_relevel(month, "October", "November", "December","January", "February","March", "April","May","June","July","August","September")) %>% 
+  mutate(weekday = fct_relevel(weekday, "Monday", "Tuesday", "Wednesday", "Thursday","Friday", "Saturday","Sunday")) %>% 
+  mutate(day_time = fct_relevel(day_time, "deadzone", "morning", "lunch", "afternoon","evening", "night","postgame"))
+
+
+g <- ggplot(nba_graphs, aes(x = Type, y = Engagements, fill = month))
+g + geom_boxplot(position = "dodge", outlier.shape=NA) + 
+  labs(title="Engagements by Month (From Start of Season)", x= "Month", y="Engagements", fill="Month") +
+  theme_minimal() 
 
 g <- ggplot(nba_graphs, aes(x = Type, y = Engagements, fill = weekday))
-g + geom_boxplot(position = "dodge",outlier.shape=NA) + labs(title="Engagements by Day", x= "Weekday", y="Engagements") + theme_minimal()
-
-#scale_x_discrete(limits = c("Monday", "Tuesday", "Wednesday", "Thursday","Friday", "Saturday","Sunday"))
+g + geom_boxplot(position = "dodge",outlier.shape=NA) + labs(title="Engagements by Day", x= "Weekday", y="Engagements", fill="Day of the Week") + theme_minimal()
 
 g <- ggplot(nba_graphs, aes(x = Type, y = Engagements, fill = day_time))
-g + geom_boxplot(position = "dodge", outlier.shape=NA) + labs(title="Engagements by Time of Day", x= "day_time", y="Engagements") + theme_minimal()
+g + geom_boxplot(position = "dodge", outlier.shape=NA) + labs(title="Engagements by Time of Day", x= "day_time", y="Engagements", fill="Time Period in the Day") + theme_minimal()
 
-#+ scale_x_discrete(limits = c("deadzone", "morning", "lunch", "afternoon","evening", "night","postgame"))
 
 g <- ggplot(nba_graphs, aes(x = Type, y = Engagements, fill = season_yr))
 g + geom_boxplot(position = "dodge", outlier.shape=NA) + labs(title="Effect of Season Year on Engagements", x= "Season Year", y="Engagements") + theme_minimal()
@@ -244,7 +245,7 @@ While the distribution of Video and Photo distribution seems to be fairly normal
 
 ```{r echo=FALSE}
 # Density Plot of Engagements Post Type
-library(ggplot2)
+
 ggplot(nba) +
   geom_density(aes(x=Engagements, fill=Type), 
                  colour="grey50", alpha=0.5, position="identity") + ylab("Density") + ggtitle("Distribution of Engagements by Post Type")
@@ -300,8 +301,6 @@ We then train the Random Forest model to predict \textit{Engagements} on the tes
 
 ```{r}
 # Models for each subset
-
-vars <- 
 
 RF_Video <- randomForest(Engagements ~ Followers+month+weekday+day_time+Followers_Mentioned+is_playoffs+is_season+all_nba+league_type+same_day_post+num_ats+num_hash, xtest = test_dataRF_Video[,c(2,8,10,11,12,15,17:22)], ytest = test_dataRF_Video$Engagements, ntree=1000, mtry=8, maxnodes=100,importance=TRUE, data=train_dataRF_Video)
 RF_Video
