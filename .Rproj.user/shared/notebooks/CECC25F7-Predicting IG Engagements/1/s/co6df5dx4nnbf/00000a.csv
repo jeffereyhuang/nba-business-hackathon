@@ -1,4 +1,0 @@
-"0","holdout <- read_csv(""data/holdout_final.csv"")
-"
-"2","Error: 'data/holdout_final.csv' does not exist in current working directory ('/Users/jeff/code/nba-business-hackathon/data').
-"
