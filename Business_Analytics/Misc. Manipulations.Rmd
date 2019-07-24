@@ -3,10 +3,6 @@ title: "NBA Hackathon Extra Stuff"
 output: pdf_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-Here, we prepare our data into matrices for use with xgboost for our training and test data sets.
-
 ```{r}
 
 #Prepare for training and validating XGBoosted Model
@@ -181,24 +177,99 @@ for (i in holdout)
 
 ```
 
+\textbf{Extra Variable Creation Script}
+
+```{r}
+## Create variables for number of people and number of hashtags
+## mentioned, turn weekdays and post type into numbers, and clean is_season variable.
+
+df <- read.csv("~/Desktop/NBA_Analytics/nba-business-hackathon/data/training_set_extended_5.csv")
+
+nba <- df %>% 
+  mutate(num_ats = str_count(Description, "@"),
+         num_hash = str_count(Description, "#"))
+
+nba$Type_num <- NA
+for(i in 1:length(nba[,1])){
+  if(nba$Type[i] == "Video")(nba$Type_num[i] = 1)
+  if(nba$Type[i] == "Photo")(nba$Type_num[i] = 2)
+  if(nba$Type[i] == "Album")(nba$Type_num[i] = 3)
+}
+nba$wkdy_num <- NA
+for(i in 1:length(nba[,1])){
+  if(nba$weekday[i] == "Sunday")(nba$wkdy_num[i] = 1)
+  if(nba$weekday[i] == "Monday")(nba$wkdy_num[i] = 2)
+  if(nba$weekday[i] == "Tuesday")(nba$wkdy_num[i] = 3)
+  if(nba$weekday[i] == "Wednesday")(nba$wkdy_num[i] = 4)
+  if(nba$weekday[i] == "Thursday")(nba$wkdy_num[i] = 5)
+  if(nba$weekday[i] == "Friday")(nba$wkdy_num[i] = 6)
+  if(nba$weekday[i] == "Saturday")(nba$wkdy_num[i] = 7)
+}
+nba$day_time_num <- NA
+for(i in 1:length(nba[,1])){
+  if(nba$day_time[i] == "deadzone")(nba$day_time_num[i] = 1)
+  if(nba$day_time[i] == "morning")(nba$day_time_num[i] = 2)
+  if(nba$day_time[i] == "lunch")(nba$day_time_num[i] = 3)
+  if(nba$day_time[i] == "afternoon")(nba$day_time_num[i] = 4)
+  if(nba$day_time[i] == "evening")(nba$day_time_num[i] = 5)
+  if(nba$day_time[i] == "night")(nba$day_time_num[i] = 6)
+  if(nba$day_time[i] == "postgame")(nba$day_time_num[i] = 7)
+}
+
+# Delete irrelevant indexing columns.
+nba <- nba[,-c(1,2)]
+write.csv(nba, file = "training_set_final.csv")
+
 ```
 
-## R Markdown
+```{r}
+nba_graphs <- nba
+nba_graphs$is_playoffs = as.factor(nba$is_playoffs)
+nba_graphs$all_nba = as.factor(nba$all_nba)
+nba_graphs$league_type = as.factor(nba$league_type)
+nba_graphs$is_season = as.factor(nba$is_season)
+nba_graphs$same_day_post = as.factor(nba$same_day_post)
+nba_graphs$num_ats = as.factor(nba$num_ats)
+nba_graphs$num_hash = as.factor(nba$num_hash)
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+g <- ggplot(nba_graphs, aes(x = Type, y = Engagements, fill = month))
+g + geom_boxplot(position = "dodge", outlier.shape=NA) + labs(title="Engagements by Month", x= "Month", y="Engagements") + theme_minimal()
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+#scale_x_discrete(limits = c("October", "November", "December","January", "February","March", "April","May","June","July","August","September"))
 
-```{r cars}
-summary(cars)
+g <- ggplot(nba_graphs, aes(x = Type, y = Engagements, fill = weekday))
+g + geom_boxplot(position = "dodge",outlier.shape=NA) + labs(title="Engagements by Day", x= "Weekday", y="Engagements") + theme_minimal()
+
+#scale_x_discrete(limits = c("Monday", "Tuesday", "Wednesday", "Thursday","Friday", "Saturday","Sunday"))
+
+g <- ggplot(nba_graphs, aes(x = Type, y = Engagements, fill = day_time))
+g + geom_boxplot(position = "dodge", outlier.shape=NA) + labs(title="Engagements by Time of Day", x= "day_time", y="Engagements") + theme_minimal()
+
+#+ scale_x_discrete(limits = c("deadzone", "morning", "lunch", "afternoon","evening", "night","postgame"))
+
+
+g <- ggplot(nba_graphs, aes(x = Type, y = Engagements, fill = is_season))
+g + geom_boxplot(position = "dodge", outlier.shape=NA) + labs(title="Effect of Being In Season on Engagements", x= "Season or Off-Season", y="Engagements") + theme_minimal()
+
+g <- ggplot(nba_graphs, aes(x = Type, y = Engagements, fill = is_playoffs))
+g + geom_boxplot(position = "dodge", outlier.shape=NA) + labs(title="Effect of Playoff Season on Engagements", x= "During Playoffs", y="Engagements") + theme_minimal()
+
+g <- ggplot(nba_graphs, aes(x = Type, y = Engagements, fill = all_nba))
+g + geom_boxplot(position = "dodge", outlier.shape=NA) + labs(title="Effect of Star Players on Engagements", x= "Type of Star Players", y="Engagements") + theme_minimal()
+
+g <- ggplot(nba_graphs, aes(x = Type, y = Engagements, fill = league_type))
+g + geom_boxplot(position = "dodge", outlier.shape=NA) + labs(title="Effect of NBA vs GLeague vs WNBA on Engagements", x= "Type of League", y="Engagements") + theme_minimal()
+
+g <- ggplot(nba_graphs, aes(x = Type, y = Engagements, fill = same_day_post))
+g + geom_boxplot(position = "dodge", outlier.shape=NA) + labs(title="Effect of Posting in the Same Time Period", x= "Same Time Period", y="Engagements") + theme_minimal()
+
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+```{r}
+#varsVid = colnames(train_dataRF_Video[c(2,8,10,11,12,14,15,16,17,18,19,20)])
+#varsPhoto = colnames(train_dataRF_Photo[c(2,8,10,11,12,14,15,16,17,18,19,20)])
+#varsAlbum = colnames(train_dataRF_Album[c(2,8,10,11,12,14,15,16,17,18,19,20)])
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```
