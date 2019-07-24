@@ -1,0 +1,2 @@
+"0","g <- ggplot(nba_graphs, aes(x = weekday, y = Engagements))"
+"0","g + geom_boxplot(position = ""dodge"", fill = ""#C3D7A4"") + labs(title=""Engagements by Day"", x= ""Weekday"", y=""Engagements"") + scale_x_discrete(limits = c(""Monday"", ""Tuesday"", ""Wednesday"", ""Thursday"",""Friday"", ""Saturday"",""Sunday"")) + theme_minimal()"

@@ -1,0 +1,10 @@
+
+library(tidyverse)
+
+holdout <- read_csv("data/holdout_final.csv")
+
+holdout %>% 
+  filter(is_season == TRUE) %>% 
+  summary()
+
+

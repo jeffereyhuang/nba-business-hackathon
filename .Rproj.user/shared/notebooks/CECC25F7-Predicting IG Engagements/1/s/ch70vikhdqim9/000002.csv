@@ -1,0 +1,5 @@
+"0","# Calculating MAPE of training sets"
+"0","RF_Video <- randomForest(Engagements ~ Followers+month+day_time+weekday+Followers_Mentioned+is_season+all_nba+league_type+num_ats+num_hash, ntree=1000, mtry=7,importance=TRUE, data=train_dataRF_Video)"
+"2","Error in eval(m$data, parent.frame()) : 
+  object 'train_dataRF_Video' not found
+"

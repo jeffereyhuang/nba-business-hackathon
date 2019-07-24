@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1563939028750.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "4030979374",
+    "id" : "C8148F38",
+    "lastKnownWriteTime" : 1557928466,
+    "last_content_update" : 1557928466,
+    "path" : "~/code/EC1152/project4/JeffHuang_Script.R",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "88,0",
+        "scrollLine" : "73"
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

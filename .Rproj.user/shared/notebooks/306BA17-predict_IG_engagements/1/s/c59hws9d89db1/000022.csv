@@ -1,0 +1,2 @@
+"0","g <- ggplot(nba_graphs, aes(x = is_playoffs, y = Engagements))"
+"0","g + geom_boxplot(position = ""dodge"", fill = ""#FFDB6D"") + labs(title=""Effect of Playoff Season on Engagements"", x= ""During Playoffs"", y=""Engagements"") + theme_minimal()"

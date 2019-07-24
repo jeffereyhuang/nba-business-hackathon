@@ -1,0 +1,6 @@
+"0","## Deleting missing data"
+"0","# Order data by post description"
+"0","df <- df[order(df$Description),]"
+"0","# Delete descriptions with NAs, just symbols, or just emojis"
+"0","# and remove season_yr and is_finals column"
+"0","nba <- df[-c(1:14,20:35), -c(15,17)]"

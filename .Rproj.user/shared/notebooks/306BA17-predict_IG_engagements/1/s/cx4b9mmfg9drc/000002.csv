@@ -1,0 +1,6 @@
+"0","## Deleting missing data"
+"0","# Order data by post description"
+"0","df <- df[order(df$Description),]"
+"0","# Delete "
+"0","df <- df[-c(1:14), ]"
+"0","df <- df[-c(6:21), ]"

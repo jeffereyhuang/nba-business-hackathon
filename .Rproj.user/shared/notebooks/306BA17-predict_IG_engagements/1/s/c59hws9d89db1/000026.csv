@@ -1,0 +1,2 @@
+"0","g <- ggplot(nba_graphs, aes(x = league_type, y = Engagements))"
+"0","g + geom_boxplot(position = ""dodge"", fill = ""#F4EDCA"") + labs(title=""Effect of NBA vs GLeague vs WNBA on Engagements"", x= ""Type of League"", y=""Engagements"") + theme_minimal()"

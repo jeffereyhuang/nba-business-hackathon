@@ -1,0 +1,216 @@
+rm(list=ls())
+set.seed(123)
+
+library(tidyverse)
+library(janitor)
+
+if (!require(foreign)) install.packages("foreign"); library(foreign)
+if (!require(haven)) install.packages("haven"); library(haven)
+if (!require(randomForest)) install.packages("randomForest"); library(randomForest)
+if (!require(rpart)) install.packages("rpart"); library(rpart)
+library(urbnmapr)
+
+train <- read_dta("atlas_training.dta")
+
+addtl <- read_csv("addtl.csv") 
+
+colnames(addtl) <- gsub('County.', '', colnames(addtl))
+
+# q3
+gdc <-merge(addtl,train,by = "geoid") %>% 
+  clean_names()
+# q4
+gdc$mortality_event_age_years1to4 <- (100000*gdc$mortality_event_age_years1to4)/gdc$pop
+gdc$mortality_event_age_years5to14 <- (100000*gdc$mortality_event_age_years5to14)/gdc$pop
+gdc$mortality_event_age_years15to24 <- (100000*gdc$mortality_event_age_years15to24)/gdc$pop
+gdc$person_age_years25onwards_educational_attainment_masters_degree <- (100000*gdc$person_age_years25onwards_educational_attainment_masters_degree)/gdc$pop
+gdc$person_age_years25onwards_educational_attainment_bachelors_degree <- (100000*gdc$person_age_years25onwards_educational_attainment_bachelors_degree)/gdc$pop
+gdc$person_poverty_status_above_poverty_level_in_the_past12months <- (100000*gdc$person_poverty_status_above_poverty_level_in_the_past12months)/gdc$pop
+gdc$housing_unit_number_of_rooms_rooms3 <- gdc$housing_unit_number_of_rooms_rooms3/gdc$housing
+gdc$household_income_us_dollar200000onwards <- gdc$household_income_us_dollar200000onwards/gdc$housing
+gdc$person_citizenship_us_citizen_born_in_the_united_states <- gdc$person_citizenship_us_citizen_born_in_the_united_states/gdc$pop
+gdc$person_race_usc_hispanic_or_latino_race <- gdc$person_race_usc_hispanic_or_latino_race/gdc$pop
+gdc$person_race_usc_black_or_african_american_alone <- gdc$person_race_usc_black_or_african_american_alone/gdc$pop
+gdc$person_race_usc_white_alone <- gdc$person_race_usc_white_alone/gdc$pop
+
+
+gdc <- gdc %>% 
+  rename(
+         masters = person_age_years25onwards_educational_attainment_masters_degree,
+         bachelors = person_age_years25onwards_educational_attainment_bachelors_degree,
+         poverty_level = person_poverty_status_above_poverty_level_in_the_past12months,
+         rooms_3 = housing_unit_number_of_rooms_rooms3,
+         income_over_200 = household_income_us_dollar200000onwards,
+         citizenship = person_citizenship_us_citizen_born_in_the_united_states,
+         hisp = person_race_usc_hispanic_or_latino_race,
+         black = person_race_usc_black_or_african_american_alone,
+         white = person_race_usc_white_alone
+         )
+
+
+
+# Q5
+#Drop data with lots of missing values
+gdc = select(gdc, -3, -4, -9, -place_y)
+
+vars <- colnames(gdc[3:12])
+summary(gdc[3:12])
+
+# Q6
+reg2 <- with(gdc[gdc$training==1,], lm(reformulate(vars, "kfr_pooled_p25")))
+summary(reg2)
+
+# Q8
+vars <- colnames(gdc[3:15,18:ncol(gdc)])
+reg2 <- with(gdc[gdc$training==1,], lm(reformulate(vars, "kfr_pooled_p25")))
+summary(reg2)
+rank_hat_ols = predict(reg2, newdata=gdc)
+summary(rank_hat_ols); hist(rank_hat_ols, xlab="Predicted Rates - OLS")
+gdc$predictions_ols <- rank_hat_ols
+
+# Q9
+one_tree <- rpart(reformulate(vars, "kfr_pooled_p25")
+                  , data=gdc
+                  , subset = training==1
+                  , control = rpart.control(xval = 10)) ## this sets the number of folds for cross validation.
+rank_hat_tree <- predict(one_tree, newdata=gdc)
+gdc$predictions_tree <- rank_hat_tree
+# print complexity parameter table using cross validation
+printcp(one_tree)
+
+
+
+# Q11
+#Random Forest from 1000 Bootstrapped Samples
+forest_hat <- randomForest(reformulate(vars, "kfr_pooled_p25"), ntree=1000, mtry=11, maxnodes=100
+                           ,importance=TRUE, do.trace=25, data=gdc[gdc$training==1,])
+getTree(forest_hat, 250, labelVar = TRUE) #Text Representation of Tree
+rank_hat_forest <- predict(forest_hat, newdata=gdc,type="response")
+summary(rank_hat_forest); hist(rank_hat_forest, xlab="Predicted Rates - Random Forest")
+gdc$predictions_forest <- rank_hat_forest
+
+
+# Q13
+test <- read_dta("atlas_test.dta")
+gdc <-merge(test,gdc,by = "geoid") 
+  
+gdc$pred_error_for = gdc$kfr_actual - rank_hat_forest
+gdc$mse_forest = gdc$pred_error_for^2
+
+gdc$pred_error_trees = gdc$kfr_actual - rank_hat_tree
+gdc$mse_trees = gdc$pred_error_trees^2
+
+gdc$pred_error_ols = gdc$kfr_actual - rank_hat_ols
+gdc$mse_ols = gdc$pred_error_ols^2
+
+
+mse_test <- subset(gdc, test==1, select = c(mse_forest,mse_trees,mse_ols)) 
+summary(mse_test) 
+
+mse_train <- subset(gdc, training==1, select = c(mse_forest,mse_trees,mse_ols)) 
+summary(mse_test) 
+
+
+
+# Q16
+gdc <- mutate(gdc, geoid = as.character(geoid))
+
+gdc_map <- left_join(gdc, counties, by = c("geoid" = "county_fips" ))
+
+gdc_map %>%
+  ggplot(aes(x=long, y=lat, group=geoid,
+             fill=predictions_ols)) +
+  geom_polygon(color=NA) +
+  coord_map(projection="albers", lat0=39, lat1=45) +
+  labs(title="OLS Predictions")
+
+gdc_map %>%
+  ggplot(aes(x=long, y=lat, group=geoid,
+             fill=predictions_tree)) +
+  geom_polygon(color=NA) +
+  coord_map(projection="albers", lat0=39, lat1=45) +
+  labs(title="Decision Tree Predictions")
+
+gdc_map %>%
+  ggplot(aes(x=long, y=lat, group=geoid,
+             fill=predictions_forest)) +
+  geom_polygon(color=NA) +
+  coord_map(projection="albers", lat0=39, lat1=45) + 
+  labs(title="Random Forest Predictions")
+
+
+### SUPER LEARNER ###
+if (!require(rpart)) install.packages("rpart"); library(rpart)
+if (!require(dplyr)) install.packages("dplyr"); library(dplyr)
+if (!require(SuperLearner)) install.packages("SuperLearner"); library(SuperLearner)
+if (!require(haven)) install.packages("haven"); library(haven)
+if (!require(ranger)) install.packages("ranger"); library(ranger)
+if (!require(randomForest)) install.packages("randomForest"); library(randomForest)
+if (!require(gam)) install.packages("gam"); library(gam)
+if (!require(glmnet)) install.packages("glmnet"); library(gam)
+if (!require(earth)) install.packages("earth"); library(earth)
+if (!require(nnet)) install.packages("nnet"); library(nnet)
+if (!require(gbm)) install.packages("gbm"); library(gbm)
+if (!require(arm)) install.packages("arm"); library(arm)
+
+
+project4 <- read_dta("project4.dta")
+View(project4)
+
+#### Easy Implementation of the Super Learner ####
+#The super chooses the optimal weighted combination of algorithms that minimizes a cross validated loss function#
+#See Rose (2013) "Mortality risk score prediction in an elderly population using machine learning."
+#for a thorough and relatively non-technical review
+#install.packages("SuperLearner")#
+
+project4_train <- project4 %>%
+  filter(training==1)
+
+project4_test <- project4 %>%
+  filter(training==0)
+
+vars <- colnames(project4[10:ncol(project4)])
+
+Y.train <- project4_train$kfr_pooled_p25
+X.train <- subset(project4_train, select=vars)
+X <- subset(project4, select=vars)
+
+
+#think about the algorithms you would like to include in your library#
+#the super learner package has many choices built in# use listWrappers() to see all possible algorithms
+#Here is an example library#
+SL.library <- list(c("SL.randomForest", "screen.glmnet"), "SL.glm", "SL.rpart")
+
+##Now we can create a super learner function
+##SUPER LEARNER##
+prediction.function <- SuperLearner(Y=Y.train, X = X.train, SL.library = SL.library, family = gaussian())
+#where Y is the outcome, X is matrix of covariates you would like to consider, and family tells the 
+#function whether or not your outcome is binary or continuous.
+prediction.function
+
+##to get new predictions using your function, you can use the predict function
+out <- predict(prediction.function , newdata = X)
+project4$SLpred <- out$pred
+
+
+###################################################
+##Bigger SL Library - Try some additional algorithms
+#Still does not consider many of the most populat/best performing algorithms 
+SL.library1 <- list(c("SL.glm", "screen.glmnet"),
+                    c("SL.gam", "screen.glmnet"),
+                    c("SL.earth", "screen.glmnet"),
+                    c("SL.nnet", "screen.glmnet"),
+                    c("SL.bayesglm", "screen.glmnet"),
+                    "SL.glm", "SL.rpart","SL.randomForest", "SL.glmnet","SL.rpartPrune"
+)
+
+prediction.function1 <- SuperLearner(Y=Y.train, X = X.train, newX = X.train, SL.library = SL.library1, family = gaussian())
+
+##Lets see how each algorithm performed and how much weight is given to each algorithm
+prediction.function1
+
+##to get new predictions using your function, you can use the predict function
+out1 <-predict(prediction.function1 , newdata = X)
+project4$SLpred2 <- out1$pred
+
+
