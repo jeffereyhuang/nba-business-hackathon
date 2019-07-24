@@ -1,6 +1,7 @@
 # NBA Business Hackathon
 
-Project Participants: Ramtin Talebi, Jefferey Huang, Daniel Alpert, Nate Hollenberg  Hackathon Info: https://hackathon.nba.com/
+Project Participants: Ramtin Talebi, Jefferey Huang, Daniel Alpert, Nate Hollenberg 
+Hackathon Info: https://hackathon.nba.com/
 
 This project, part of the NBA Hackathon challenge, predicts the number of engagements (as defined by the NBA) using random forest algorithms based upon three provided variables: the post type (photo, video, album), post date-time, and full description. A training set of 7500+ posts and hold-out set of 1000 posts were provided, and submissions are graded on Mean Absolute Prediction Error (MAPE) on the holdout set.
 
