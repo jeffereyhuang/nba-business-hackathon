@@ -418,6 +418,8 @@ for(i in 1:length(holdout[,1])){
 
 ```{r}
 ## Models for training and prediction
+nba_vars = cbind(nba[2], nba[9], nba[11], nba[16], nba[18:20], nba[23:24])
+vars = colnames(nba_vars)
 
 RF_Video_Final <- randomForest(Engagements ~ Followers+month+weekday+day_time+Followers_Mentioned+is_playoffs+season_yr+is_season+all_nba+league_type+same_day_post+num_ats+num_hash, ntree=1000, mtry=8, maxnodes=100,importance=TRUE, data=nba_Video)
 
