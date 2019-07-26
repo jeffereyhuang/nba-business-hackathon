@@ -1,7 +1,7 @@
 ---
 title: "NBA Hackathon, Business Analytics Question - Tuned Random Forest Model for Predicting Instagram Engagments"
 authors: "Daniel Alpert, Nathaniel Hollenberg, Jefferey Huang, Ramtin Talebi"
-output: pdf_document
+output: md_document
 ---
 ### Introduction
 
@@ -52,7 +52,7 @@ library(corrplot)
 library(Hmisc)
 
 # Read in data
-df <- read.csv("~/Desktop/NBA_Analytics/nba-business-hackathon/data/training_set_final.csv")
+df <- read_csv("data/training_set_final.csv") 
 ```
 
 ## Predictors Preparation and Data Parsing
@@ -266,7 +266,9 @@ More extensive cross-validation methods were used as well, but for brevity's sak
 
 ```{r}
 # Deleting unneeded variables
-nbanew <- nba[,c(2,3,4,5,6,9,11,12,15,16,17,18,20,21)]
+nbanew <- nba[,c(2,3,4,5,6,9,11,12,15,16,17,18,20,21)] 
+nbanew <- nbanew %>% mutate_if(is.character, as.factor)
+
 
 # Creating Video/Photo/Album subsets from nba data
 nba_Video = nbanew[nbanew$Type == "Video",]
@@ -295,19 +297,19 @@ We then train the Random Forest model to predict \textit{Engagements} on the tes
 
 RF_Video <- randomForest(Engagements ~ Followers+month+day_time+weekday+Followers_Mentioned
                          +is_season+all_nba+league_type+num_ats+num_hash,
-                         ntree=1000, mtry=7,importance=TRUE,
+                         ntree=1000, mtry=7,importance=TRUE, na.rm=TRUE,
                          data=train_dataRF_Video)
 RF_Video
 
 RF_Album <- randomForest(Engagements ~ Followers+month+day_time+weekday+Followers_Mentioned
                          +is_season+all_nba+league_type+num_ats+num_hash,
-                         ntree=1000, mtry=8,importance=TRUE,
+                         ntree=1000, mtry=8,importance=TRUE, na.rm=TRUE,
                          data=train_dataRF_Album)
 RF_Album
 
 RF_Photo <- randomForest(Engagements ~ Followers+month+day_time+weekday+Followers_Mentioned
                          +is_season+all_nba+league_type+num_ats+num_hash,
-                         ntree=1000, mtry=7,importance=TRUE,
+                         ntree=1000, mtry=7,importance=TRUE, na.rm=TRUE,
                          data=train_dataRF_Photo)
 RF_Photo
 
@@ -358,7 +360,7 @@ Finally, statisfied with our validation results, we train our Random Forest on t
 
 
 holdout_pre <-
-  read.csv("~/Desktop/NBA_Analytics/nba-business-hackathon/data/holdout_final.csv")
+  read.csv("data/holdout_final.csv")
 
 holdout <- holdout_pre[,c(3,4,5,6,7,11,13,14,16,19,20,21,23,24)]
 holdout$Engagements <- as.integer(holdout$Engagements)
@@ -390,7 +392,7 @@ RF_Album_Final <- randomForest(Engagements ~ Followers+month+day_time
 
 ```{r}
 #Calculate predicted values and append to holdout dataframe
-
+holdout <- holdout %>% mutate_if(is.character, as.factor)
 
 holdout_Video = holdout %>% filter(Type == "Video")
 holdout_Photo = holdout %>% filter(Type == "Photo")

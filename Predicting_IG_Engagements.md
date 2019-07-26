@@ -1,4 +1,4 @@
-NBA Hackathon, Business Analytics Question - Tuned Random Forest Model for Predicting Instagram Engagments
+NBA Hackathon (Business Analytics) - Tuned Random Forest Model for Predicting Instagram Engagments
 ================
 
 ### Introduction
@@ -104,11 +104,11 @@ By the end, both our training and holdout sets contained the following predictor
 
 Here we provide some visualizations of our training data to understand the relationships between some of our predictors and Engagements. First some boxplots of predictors effects on .
 
-![](Predicting_IG_Engagements_files/figure-markdown_github/unnamed-chunk-4-1.png)![](Predicting_IG_Engagements_files/figure-markdown_github/unnamed-chunk-4-2.png)![](Predicting_IG_Engagements_files/figure-markdown_github/unnamed-chunk-4-3.png)![](Predicting_IG_Engagements_files/figure-markdown_github/unnamed-chunk-4-4.png)![](Predicting_IG_Engagements_files/figure-markdown_github/unnamed-chunk-4-5.png)![](Predicting_IG_Engagements_files/figure-markdown_github/unnamed-chunk-4-6.png)![](Predicting_IG_Engagements_files/figure-markdown_github/unnamed-chunk-4-7.png)
+![](Predicting_IG_Engagements_files/figure-markdown_github/plots-1.png)![](Predicting_IG_Engagements_files/figure-markdown_github/plots-2.png)![](Predicting_IG_Engagements_files/figure-markdown_github/plots-3.png)![](Predicting_IG_Engagements_files/figure-markdown_github/plots-4.png)![](Predicting_IG_Engagements_files/figure-markdown_github/plots-5.png)![](Predicting_IG_Engagements_files/figure-markdown_github/plots-6.png)![](Predicting_IG_Engagements_files/figure-markdown_github/plots-7.png)
 
 Now let's see how our data looks across post types.
 
-![](Predicting_IG_Engagements_files/figure-markdown_github/unnamed-chunk-5-1.png)![](Predicting_IG_Engagements_files/figure-markdown_github/unnamed-chunk-5-2.png)![](Predicting_IG_Engagements_files/figure-markdown_github/unnamed-chunk-5-3.png)![](Predicting_IG_Engagements_files/figure-markdown_github/unnamed-chunk-5-4.png)![](Predicting_IG_Engagements_files/figure-markdown_github/unnamed-chunk-5-5.png)![](Predicting_IG_Engagements_files/figure-markdown_github/unnamed-chunk-5-6.png)![](Predicting_IG_Engagements_files/figure-markdown_github/unnamed-chunk-5-7.png)
+![](Predicting_IG_Engagements_files/figure-markdown_github/post%20type%20plots-1.png)![](Predicting_IG_Engagements_files/figure-markdown_github/post%20type%20plots-2.png)![](Predicting_IG_Engagements_files/figure-markdown_github/post%20type%20plots-3.png)![](Predicting_IG_Engagements_files/figure-markdown_github/post%20type%20plots-4.png)![](Predicting_IG_Engagements_files/figure-markdown_github/post%20type%20plots-5.png)![](Predicting_IG_Engagements_files/figure-markdown_github/post%20type%20plots-6.png)![](Predicting_IG_Engagements_files/figure-markdown_github/post%20type%20plots-7.png)
 
 From our visualizations, one notable result sticks out: The effect of mentioning a superstar player (LBJ, Curry, Kobe, or Kyrie), is quite significant. Other trends seem to be relatively straightforward with some minor exceptions.
 
@@ -118,13 +118,13 @@ In order to assess multicollinearity in our predictors, we created a plot to vis
 
 2.  The correlation between and . Intuitively this makes sense, a post must be, by our definition, during the same time period as another for to return a 1. It may be worth looking into removing one of these variables after some cross validation.
 
-![](Predicting_IG_Engagements_files/figure-markdown_github/unnamed-chunk-6-1.png)![](Predicting_IG_Engagements_files/figure-markdown_github/unnamed-chunk-6-2.png)
+![](Predicting_IG_Engagements_files/figure-markdown_github/corr%20plots-1.png)![](Predicting_IG_Engagements_files/figure-markdown_github/corr%20plots-2.png)
 
 Lastly, as hinted by the prompt, we viewed the distributions of our training data by post type (either Video, Album, or Photo) to determine whether they differed significantly.
 
 While the distribution of Video and Photo distribution seems to be fairly normal, Album appears bimodal, and all three fall under different mean values for Engagements. Based on the plots, it does seem like each distribution is different enough to warrant each having their own model. In addition, the data set contains many more videos than it does photos or albums, so if we chose to simply include post type as a predictor in one model, we'd have to weight each level accordingly. Instead we chose to create three seperate models.
 
-![](Predicting_IG_Engagements_files/figure-markdown_github/unnamed-chunk-7-1.png)
+![](Predicting_IG_Engagements_files/figure-markdown_github/density%20plots-1.png)
 
 ### Model Training and Validation
 
@@ -208,7 +208,7 @@ Our validation MAPE came out to about 5%. Not bad!
 
 Let's take a look at how our percent error is distributed across the testing set.
 
-![](Predicting_IG_Engagements_files/figure-markdown_github/unnamed-chunk-12-1.png) It appears that there are a few extreme outliers in our dataset that the model performs particularly poorly on. One in particular our model overshoots the most appears to be a post about Lebron James at a WNBA game. Intuitively, it makes sense that our model would perform poorly here. Mentioning Lebron would push the model to predict a higher engagement than would be normal for a WNBA game. Given how few outliers are, that the Random Forest is typically robust to outliers, and how rare a post like Lebron at a WNBA game is, we conclude that our model performs quite well.
+![](Predicting_IG_Engagements_files/figure-markdown_github/PE%20distribution-1.png) It appears that there are a few extreme outliers in our dataset that the model performs particularly poorly on. One in particular our model overshoots the most appears to be a post about Lebron James at a WNBA game. Intuitively, it makes sense that our model would perform poorly here. Mentioning Lebron would push the model to predict a higher engagement than would be normal for a WNBA game. Given how few outliers are, that the Random Forest is typically robust to outliers, and how rare a post like Lebron at a WNBA game is, we conclude that our model performs quite well.
 
 Here we plot some of our variables to examine which are most critical to our model's accuracy. Notably, it appears that our variables vary in importance between the subsets for Videos, Albums, and Photos. This gives some credibility to our initial assumption that Video, Albums, and Photos should each have their own model.
 
@@ -216,19 +216,19 @@ Here we plot some of our variables to examine which are most critical to our mod
 varImpPlot(RF_Video)
 ```
 
-![](Predicting_IG_Engagements_files/figure-markdown_github/unnamed-chunk-13-1.png)
+![](Predicting_IG_Engagements_files/figure-markdown_github/varplot-1.png)
 
 ``` r
 varImpPlot(RF_Album)
 ```
 
-![](Predicting_IG_Engagements_files/figure-markdown_github/unnamed-chunk-13-2.png)
+![](Predicting_IG_Engagements_files/figure-markdown_github/varplot-2.png)
 
 ``` r
 varImpPlot(RF_Photo)
 ```
 
-![](Predicting_IG_Engagements_files/figure-markdown_github/unnamed-chunk-13-3.png)
+![](Predicting_IG_Engagements_files/figure-markdown_github/varplot-3.png)
 
 ### Final Predictions
 
