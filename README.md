@@ -17,7 +17,7 @@ Here is an early density plot of engagements by post type we made while explorin
 
 ![Engagements by Post Type](https://raw.githubusercontent.com/jeffereyhuang/nba-business-hackathon/master/md_images/figure-markdown_github/density%20plots-1.png)
 
-### Code Snippets & Primary Results
+### Code Snippets — Model Validation
 
 Although the code is not included here, we tried to create a number of different models, inlcuding a least squares regression model, a gradient boosted model, a model using NLP that vectorized the descriptions column, and even using predicted values from these models into other models. Ultimately, after testing the accuracy of each, we settled on a Random Forest, as it appeared to perform best and was the least overfitted.
 
