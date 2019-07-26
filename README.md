@@ -3,11 +3,17 @@
 Project Participants: Ramtin Talebi, Jefferey Huang, Daniel Alpert, Nate Hollenberg
 
 ### Introduction
-This project, part of the NBA Hackathon challenge (https://hackathon.nba.com/), predicts the number of engagements (as defined by the NBA) using random forest algorithms. The dataset provided gives three variables: the post type (photo, video, album), post date-time, and full post description. A training set of 7500+ posts and hold-out set of 1000 posts were provided, and submissions are graded on Mean Absolute Prediction Error (MAPE) on the holdout set. The report is in PDF and MD form above, and additional code is found in the Business Analytics directory. Predictions are found in the holdout_set above.
+This project, part of the NBA Hackathon challenge (https://hackathon.nba.com/), predicts the number of engagements (as defined by the NBA) using random forest algorithms. 
+
+The dataset provided gives three variables: the post type (photo, video, album), post date-time, and full post description. A training set of 7500+ posts and hold-out set of 1000 posts were provided, and submissions are graded on Mean Absolute Prediction Error (MAPE) on the holdout set. 
+
+The report is in PDF and MD form above, and additional code is found in the Business Analytics directory. Predictions are found in the holdout_set above.
 
 ### Approach
 
-In this project, we trained a random forest algorithm on our data, after extending our dataset. We used each of the three variables to create more descriptive ones (i.e. whether or not post was made during the playoffs, whether it mentioned an all-NBA player, etc.). Then, after conducting EDA, we determined more meaningful splits, and training random forest algorithms on each post type (photos, videos and albums), ultimately arriving at a MAPE of 5%. See below for our calculations.
+In this project, we trained a random forest algorithm on our data, after extending our dataset. We used each of the three variables to create more descriptive ones (i.e. whether or not post was made during the playoffs, whether it mentioned an all-NBA player, etc.). Then, after conducting EDA, we determined more meaningful splits, and training random forest algorithms on each post type (photos, videos and albums), ultimately arriving at a MAPE of 5%.
+
+Here is an early density plot of engagements by post type we made while exploring the data.
 
 ![Engagements by Post Type](https://raw.githubusercontent.com/jeffereyhuang/nba-business-hackathon/master/md_images/figure-markdown_github/density%20plots-1.png)
 
@@ -66,13 +72,14 @@ mape_Rf
 
 Our validation MAPE came out to about 5%. Not bad!
 
-### Insights & Tuning the Model
+### Insights
 Let's take a look at how our percent error is distributed across the testing set.
 
 ![Prediction Error Density](https://raw.githubusercontent.com/jeffereyhuang/nba-business-hackathon/master/md_images/figure-markdown_github/PE%20distribution-1.png)
 
 It appears that there are a few extreme outliers in our dataset that the model performs particularly poorly on. One in particular our model overshoots the most appears to be a post about Lebron James at a WNBA game. Intuitively, it makes sense that our model would perform poorly here. Mentioning Lebron would push the model to predict a higher engagement than would be normal for a WNBA game. Given how few outliers are, that the Random Forest is typically robust to outliers, and how rare a post like Lebron at a WNBA game is, we conclude that our model performs quite well.
 
+### Examining the Model
 Here we plot some of our variables to examine which are most critical to our model's accuracy. Notably, it appears that our variables vary in importance between the subsets for Videos, Albums, and Photos. This gives some credibility to our initial assumption that Video, Albums, and Photos should each have their own model.
 
 
