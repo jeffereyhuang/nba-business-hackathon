@@ -88,7 +88,7 @@ varImpPlot(RF_Album)
 varImpPlot(RF_Photo)
 ```
 
-![Var Plot Photo](https://raw.githubusercontent.com/jeffereyhuang/nba-business-hackathon/master/md_files/figure-markdown_github/varplot-3.png)
+![Var Plot Photo](https://raw.githubusercontent.com/jeffereyhuang/nba-business-hackathon/master/md_images/figure-markdown_github/varplot-3.png)
 
 ### Results
 The predictions are contained in the attached "holdout.csv" file.
