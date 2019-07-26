@@ -9,7 +9,7 @@ This project, part of the NBA Hackathon challenge (https://hackathon.nba.com/), 
 
 In this project, we trained a random forest algorithm on our data, after extending our dataset. We used each of the three variables to create more descriptive ones (i.e. whether or not post was made during the playoffs, whether it mentioned an all-NBA player, etc.). Then, after conducting EDA, we determined more meaningful splits, and training random forest algorithms on each post type (photos, videos and albums), ultimately arriving at a MAPE of 5%. See below for our calculations.
 
-![Engagements by Post Type](https://raw.githubusercontent.com/jeffereyhuang/nba-business-hackathon/blob/master/md_files/figure-markdown-github/density%20plot-1.png)
+![Engagements by Post Type](https://raw.githubusercontent.com/jeffereyhuang/nba-business-hackathon/master/md_files/figure-markdown-github/density%20plot-1.png)
 
 ### Code Snippets & Primary Results
 
