@@ -82,7 +82,7 @@ Here we plot some of our variables to examine which are most critical to our mod
 varImpPlot(RF_Album)
 ```
 
-![Var Plot Album](https://raw.githubusercontent.com/jeffereyhuang/nba-business-hackathon/master/md_images/figure-markdown_github/varplot-2.pngg)
+![Var Plot Album](https://raw.githubusercontent.com/jeffereyhuang/nba-business-hackathon/master/md_images/figure-markdown_github/varplot-2.png)
 
 ``` r
 varImpPlot(RF_Photo)
