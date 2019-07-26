@@ -39,6 +39,7 @@ RF_Photo <- randomForest(Engagements ~ Followers+month+day_time+weekday+Follower
                          ntree=1000, mtry=7,importance=TRUE,
                          data=train_dataRF_Photo)
 ```
+**Validation Results**
 
     ## Video
     ##                Type of random forest: regression
@@ -80,15 +81,15 @@ It appears that there are a few extreme outliers in our dataset that the model p
 ### Examining the Model
 Here we plot some of our variables to examine which are most critical to our model's accuracy. Notably, it appears that our variables vary in importance between the subsets for Videos, Albums, and Photos. This gives some credibility to our initial assumption that Video, Albums, and Photos should each have their own model.
 
-Video RF Variables
+**Video RF Variables**
 
 ![Var Plot Video](https://raw.githubusercontent.com/jeffereyhuang/nba-business-hackathon/master/md_images/figure-markdown_github/varplot-1.png)
 
-Album RF Variables
+**Album RF Variables**
 
 ![Var Plot Album](https://raw.githubusercontent.com/jeffereyhuang/nba-business-hackathon/master/md_images/figure-markdown_github/varplot-2.png)
 
-Photo RF Variables
+**Photo RF Variables**
 
 ![Var Plot Photo](https://raw.githubusercontent.com/jeffereyhuang/nba-business-hackathon/master/md_images/figure-markdown_github/varplot-3.png)
 
