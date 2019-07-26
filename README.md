@@ -64,10 +64,8 @@ RF_Photo <- randomForest(Engagements ~ Followers+month+day_time+weekday+Follower
     ##           Mean of squared residuals: 727415628
     ##                     % Var explained: 81.61
 
-``` r
-mape_Rf
-```
 
+    ## MAPE
     ## [1] 4.93106
 
 Our validation MAPE came out to about 5%. Not bad!
@@ -82,18 +80,15 @@ It appears that there are a few extreme outliers in our dataset that the model p
 ### Examining the Model
 Here we plot some of our variables to examine which are most critical to our model's accuracy. Notably, it appears that our variables vary in importance between the subsets for Videos, Albums, and Photos. This gives some credibility to our initial assumption that Video, Albums, and Photos should each have their own model.
 
+Video RF Variables
 
 ![Var Plot Video](https://raw.githubusercontent.com/jeffereyhuang/nba-business-hackathon/master/md_images/figure-markdown_github/varplot-1.png)
 
-``` r
-varImpPlot(RF_Album)
-```
+Album RF Variables
 
 ![Var Plot Album](https://raw.githubusercontent.com/jeffereyhuang/nba-business-hackathon/master/md_images/figure-markdown_github/varplot-2.png)
 
-``` r
-varImpPlot(RF_Photo)
-```
+Photo RF Variables
 
 ![Var Plot Photo](https://raw.githubusercontent.com/jeffereyhuang/nba-business-hackathon/master/md_images/figure-markdown_github/varplot-3.png)
 
