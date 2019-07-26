@@ -9,7 +9,7 @@ This project, part of the NBA Hackathon challenge (https://hackathon.nba.com/), 
 
 In this project, we trained a random forest algorithm on our data, after extending our dataset. We used each of the three variables to create more descriptive ones (i.e. whether or not post was made during the playoffs, whether it mentioned an all-NBA player, etc.). Then, after conducting EDA, we determined more meaningful splits, and training random forest algorithms on each post type (photos, videos and albums), ultimately arriving at a MAPE of 5%. See below for our calculations.
 
-![Engagements by Post Type](https://raw.githubusercontent.com/jeffereyhuang/nba-business-hackathon/master/md_files/figure-markdown_github/density%20plot-1.png)
+![Engagements by Post Type](https://raw.githubusercontent.com/jeffereyhuang/nba-business-hackathon/master/md_images/figure-markdown_github/density%20plots-1.png)
 
 ### Code Snippets & Primary Results
 
@@ -76,19 +76,19 @@ It appears that there are a few extreme outliers in our dataset that the model p
 Here we plot some of our variables to examine which are most critical to our model's accuracy. Notably, it appears that our variables vary in importance between the subsets for Videos, Albums, and Photos. This gives some credibility to our initial assumption that Video, Albums, and Photos should each have their own model.
 
 
-![Var Plot Video](https://raw.githubusercontent.com/jeffereyhuang/nba-business-hackathon/blob/master/md_files/figure-markdown_github/varplot-1.png)
+![Var Plot Video](https://raw.githubusercontent.com/jeffereyhuang/nba-business-hackathon/master/md_images/figure-markdown_github/varplot-1.png)
 
 ``` r
 varImpPlot(RF_Album)
 ```
 
-![Var Plot Album](https://raw.githubusercontent.com/jeffereyhuang/nba-business-hackathon/blob/master/md_files/figure-markdown_github/varplot-2.png)
+![Var Plot Album](https://raw.githubusercontent.com/jeffereyhuang/nba-business-hackathon/master/md_images/figure-markdown_github/varplot-2.pngg)
 
 ``` r
 varImpPlot(RF_Photo)
 ```
 
-![Var Plot Photo](https://raw.githubusercontent.com/jeffereyhuang/nba-business-hackathon/blob/master/md_files/figure-markdown_github/varplot-3.png)
+![Var Plot Photo](https://raw.githubusercontent.com/jeffereyhuang/nba-business-hackathon/master/md_files/figure-markdown_github/varplot-3.png)
 
 ### Results
 The predictions are contained in the attached "holdout.csv" file.
