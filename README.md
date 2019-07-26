@@ -92,4 +92,3 @@ varImpPlot(RF_Photo)
 
 ### Results
 The predictions are contained in the attached "holdout.csv" file.
-
