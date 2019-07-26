@@ -7,7 +7,7 @@ This project, part of the NBA Hackathon challenge (https://hackathon.nba.com/), 
 
 The dataset provided gives three variables: the post type (photo, video, album), post date-time, and full post description. A training set of 7500+ posts and hold-out set of 1000 posts were provided, and submissions are graded on Mean Absolute Prediction Error (MAPE) on the holdout set. 
 
-The report is in PDF and MD form above, and additional code is found in the Business Analytics directory. Predictions are found in the holdout_set above.
+The full report is in PDF form above, and additional code is found in the Business Analytics directory. Predictions are found in the holdout_set above.
 
 ### Approach
 
